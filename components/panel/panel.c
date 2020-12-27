@@ -174,15 +174,20 @@ static uint8_t poll_buttons(void)
 	uint8_t leds = leds_get_raw();
 	xSemaphoreTake(spi_lock, portMAX_DELAY);
 	gpio_set_level(GPIO_SS1, 0);
+	udelay(10);
 	for (int i = 0; i < 8; i++) {
 		gpio_set_level(GPIO_MOSI, leds & 0x80);
 		leds <<= 1;
-		gpio_set_level(GPIO_SCLK, 1);
+		udelay(10);
 		sample <<= 1;
 		sample |= gpio_get_level(GPIO_MISO);
+		gpio_set_level(GPIO_SCLK, 1);
+		udelay(10);
 		gpio_set_level(GPIO_SCLK, 0);
 	}
+	udelay(10);
 	gpio_set_level(GPIO_SS1, 1);
+	udelay(10);
 	xSemaphoreGive(spi_lock);
 
 	sample >>= 3;
@@ -245,6 +250,7 @@ void lcd_write(uint8_t byte, bool command)
 {
 	xSemaphoreTake(spi_lock, portMAX_DELAY);
 	gpio_set_level(GPIO_SS0, false);
+	udelay(10);
 	uint32_t data = 0x8000 | (~contrast & 0x1f) << 10 | byte;
 	if (!command) {
 		data |= 0x0100;
@@ -252,12 +258,14 @@ void lcd_write(uint8_t byte, bool command)
 	for (int i = 0; i < 16; i++) {
 		gpio_set_level(GPIO_MOSI, data & 0x8000);
 		data <<= 1;
+		udelay(10);
 		gpio_set_level(GPIO_SCLK, 1);
-		udelay(2);
+		udelay(10);
 		gpio_set_level(GPIO_SCLK, 0);
-		udelay(2);
 	}
+	udelay(10);
 	gpio_set_level(GPIO_SS0, true);
+	udelay(10);
 	xSemaphoreGive(spi_lock);
 }
 
@@ -266,16 +274,19 @@ void set_contrast(uint8_t n)
 	contrast = n;
 	xSemaphoreTake(spi_lock, portMAX_DELAY);
 	gpio_set_level(GPIO_SS0, false);
+	udelay(10);
 	uint32_t data = 0x0000 | (~contrast & 0x1f) << 10;
 	for (int i = 0; i < 16; i++) {
 		gpio_set_level(GPIO_MOSI, data & 0x8000);
 		data <<= 1;
+		udelay(10);
 		gpio_set_level(GPIO_SCLK, 1);
-		udelay(2);
+		udelay(10);
 		gpio_set_level(GPIO_SCLK, 0);
-		udelay(2);
 	}
+	udelay(10);
 	gpio_set_level(GPIO_SS0, true);
+	udelay(10);
 	xSemaphoreGive(spi_lock);
 }
 

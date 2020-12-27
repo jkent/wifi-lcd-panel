@@ -136,6 +136,7 @@ static void wifi_config_back_action(view_t *view)
 	esp_wifi_disconnect();
 	esp_wifi_set_config(ESP_IF_WIFI_STA, &s_wifi_config);
 	esp_wifi_connect();
+    strcpy(s_wifi_status.status, "Connecting");
 
 	dialog_exit();
 	dialog->free(dialog);
